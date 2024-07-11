@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const generateUUID = require('../utils/generateUUID');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
+const authenticateJWT = require('../middlewares/authmiddleware');
 
 const router = express.Router();
 
@@ -15,13 +16,13 @@ router.post('/login', async (req, res) => {
         // 이메일주소로 db매칭
         const foundUser = await User.findOne({ where: { email: email } });
         if (!foundUser) {
-            res.status(400).json({ error: "Cannot find User" });
+            return res.status(400).json({ error: "Cannot find User" });
         }
 
         // 비밀번호 확인
         const isMatch = await bcrypt.compare(password, foundUser.password);
         if (!isMatch) {
-            res.status(400).json({ error: "Password does not match" });
+            return res.status(400).json({ error: "Password does not match" });
         }
 
         // 토근 생성 및 응답.
@@ -38,9 +39,9 @@ router.post('/login', async (req, res) => {
             }
         );
 
-        res.json({accessToken, refreshToken});
+        return res.json({accessToken, refreshToken});
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        return res.status(500).json({ error: e.message });
     }
         
     
@@ -53,6 +54,13 @@ router.post('/register', body('email').isEmail(),  async (req, res) => {
     if (!errs.isEmpty()) {
         return res.status(400).json({ err: "유효하지 않은 이메일" });
     }
+
+    // 이메일주소로 db매칭 후 이미 있다면 생성하지 않음
+    const foundUser = await User.findOne({ where: { email: email } });
+    if (foundUser) {
+        return res.status(400).json({ error: "User already exists" });
+    }    
+
     // 비밀번호 암호화..
     const hashedPW = await bcrypt.hash(password, 10);
     
@@ -68,7 +76,7 @@ router.post('/register', body('email').isEmail(),  async (req, res) => {
         });
         res.status(201).json(newUser);
     } catch (e) {
-        res.status(500).json({error: e.message});
+        return res.status(500).json({error: e.message});
     }
 });
 
@@ -84,10 +92,35 @@ router.post('/refresh', async (req, res) => {
             if (err) return res.status(403).json({ err: "Invalid refresh token" });
 
             const accessToken = generateAccessToken({ email: user.email });
-            res.json({ accessToken });
+            return res.json({ accessToken });
         });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        return res.status(500).json({ error: e.message });
+    }
+});
+
+router.post('/logout', authenticateJWT, async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        const foundUser = await User.findOne({ where: { refreshToken: token } });
+        if (!foundUser) return res.status(403).json({ err: "Invalid refresh token" });
+
+        jwt.verify(token, process.env.JWT_REFRESH_KEY, async (err, user) => {
+            if (err) return res.status(403).json({ err: "Invalid refresh token" });
+
+        await User.update(
+            { refreshToken: null },
+            {
+                where: {
+                    uuid: foundUser.uuid
+                }
+            });
+        
+            return res.sendStatus(204);
+        });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
     }
 });
 
