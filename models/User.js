@@ -27,7 +27,6 @@ const User = sequelize.define(
         },
         refreshToken: {
             type: Sequelize.DataTypes.STRING(512),
-            allowNull: false
         },
         isAdmin: {
             type: Sequelize.DataTypes.BOOLEAN,
