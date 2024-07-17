@@ -5,28 +5,28 @@ const User = sequelize.define(
     'users',
     {
         uuid: {
-            type: Sequelize.DataTypes.UUID,
+            type: DataTypes.UUID,
             primaryKey: true,
             allowNull: false
         },
         userName: {
-            type: Sequelize.DataTypes.STRING,
+            type: DataTypes.STRING,
             allowNull: false
         },
         email: {
-            type: Sequelize.DataTypes.STRING,
+            type: DataTypes.STRING,
             unique: true,
             allowNull: false
         },
         password: {
-            type: Sequelize.DataTypes.STRING(512),
+            type: DataTypes.STRING(512),
             allowNull: false
         },
         refreshToken: {
-            type: Sequelize.DataTypes.STRING(512),
+            type: DataTypes.STRING(512),
         },
         isAdmin: {
-            type: Sequelize.DataTypes.BOOLEAN,
+            type: DataTypes.BOOLEAN,
             defaultValue: false,
             allowNull: false
         }

@@ -1,10 +1,13 @@
 const { Sequelize,  DataTypes } = require('sequelize');
 const sequelize = require('../db/db');
+const User = require('./User');
+const ReviewPost = require('./ReviewPost');
 
 const ReviewComment = sequelize.define(
     'reviewComments', {
-        commentid: {
+        commentId: {
             type: DataTypes.INTEGER,
+            primaryKey: true,
             autoIncrement: true,
             allowNull: false
         },
@@ -12,7 +15,7 @@ const ReviewComment = sequelize.define(
             type: DataTypes.TEXT,
             allowNull: false
         },
-        writtenby: {
+        writtenBy: {
             type: DataTypes.UUID,
             allowNull: false,
             references: {
@@ -24,7 +27,7 @@ const ReviewComment = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: ReviewArticle,
+                model: ReviewPost,
                 key: 'postid'
             }
         }
