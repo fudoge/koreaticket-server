@@ -13,6 +13,6 @@ router.post('/register', body('email').isEmail(), validateRegister, authService.
 
 router.post('/refresh', authService.refresh);
 
-router.post('/logout', authenticateJWT, authService.logout);
+router.patch('/logout', authenticateJWT, authService.logout);
 
 module.exports = router;

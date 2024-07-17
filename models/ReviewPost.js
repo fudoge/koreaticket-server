@@ -1,16 +1,23 @@
-const { Sequelize,  DataTypes } = require('sequelize')
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db/db');
+const User = require('./User');
 
 const ReviewPost = sequelize.define(
     'reviewPosts',
     {
-        postid: {
-            type: Sequelize.DataTypes.INTEGER,
+        postId: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
             autoIncrement: true,
             allowNull: false
         },
-        writtenby: {
-            type: Sequelize.DataTypes.UUID,
+        isNotice: {
+            type: DataTypes.Boolean,
+            defaultValue: false,
+            allowNull: false
+        },
+        writtenBy: {
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: User,
@@ -18,11 +25,11 @@ const ReviewPost = sequelize.define(
             }
         },
         title: {
-            type: Sequelize.DataTypes.STRING,
+            type: DataTypes.STRING,
             allowNull: false
         },
         content: {
-            type: Sequelize.DataTypes.TEXT
+            type: DataTypes.TEXT
         }
     }
 );
