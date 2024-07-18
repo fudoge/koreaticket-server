@@ -13,64 +13,66 @@ const InquiryReply = require('./InquiryReply');
 // relationshop connection
 
 // User - ReviewPost
-User.hasMany(ReviewPost, { foreignkey: 'writtenBy' });
-ReviewPost.belongsTo(User, { foreignkey: 'writtenBy' });
+User.hasMany(ReviewPost, { foreignKey: 'writtenBy' , onDelete: 'CASCADE'});
+ReviewPost.belongsTo(User, { foreignKey: 'writtenBy' });
 
 // User - ReviewComment
-User.hasMany(ReviewComment, { foreignkey: 'writtenBy' });
-ReviewComment.belongsTo(User, { foreignkey: 'writtenBy' });
+User.hasMany(ReviewComment, { foreignKey: 'writtenBy', onDelete: 'CASCADE' });
+ReviewComment.belongsTo(User, { foreignKey: 'writtenBy' });
 
 // ReviewPost - ReviewComment
-ReviewPost.hasMany(ReviewComment, { foreignkey: 'postId' });
-ReviewComment.belongsTo(ReviewPost, { foreignkey: 'postId' });
+ReviewPost.hasMany(ReviewComment, { foreignKey: 'postId', onDelete: 'CASCADE' });
+ReviewComment.belongsTo(ReviewPost, { foreignKey: 'postId' });
 
 // ReviewPost - ReviewImage
-ReviewPost.hasMany(ReviewImage, { foreignkey: 'postId' });
-ReviewImage.belongsTo(ReviewPost, { foreignkey: 'postId' });
+ReviewPost.hasMany(ReviewImage, { foreignKey: 'postId', onDelete: 'CASCADE' });
+ReviewImage.belongsTo(ReviewPost, { foreignKey: 'postId' });
 
 // User - InquiryPost
-User.hasMany(InquiryPost, { foreignkey: 'writtenBy' });
-InquiryPost.belongsTo(User, { foreignkey: 'writtenby' });
+User.hasMany(InquiryPost, { foreignKey: 'writtenBy' });
+InquiryPost.belongsTo(User, { foreignKey: 'writtenby' });
 
 // InquiryPost - InquiryReplies
-InquiryPost.hasOne(InquiryReply, { foreignkey: 'postId' });
-InquiryReply.belongsTo(InquiryPost, { foreignkey: 'postId' });
+InquiryPost.hasOne(InquiryReply, { foreignKey: 'postId' });
+InquiryReply.belongsTo(InquiryPost, { foreignKey: 'postId' });
 
 // Stadium - Team
-Stadium.hasOne(Team, { foreignkey: 'stadiumId' });
-Team.belongsTo(Stadium, { foreignkey: 'stadiumId' });
+Stadium.hasOne(Team, { foreignKey: 'stadiumId' });
+Team.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
 // Stadium - StadiumArea
-Stadium.hasMany(StadiumArea, { foreignkey: 'stadiumId' });
-StadiumArea.belongsTo(Stadium, { foreignkey: 'stadiumId' });
+Stadium.hasMany(StadiumArea, { foreignKey: 'stadiumId' });
+StadiumArea.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
 // Stadium - Match
-Stadium.hasMany(Match, { foreignkey: 'stadiumId' });
-Match.belongsTo(Stadium, { foreignkey: 'stadiumId' });
+Stadium.hasMany(Match, { foreignKey: 'stadiumId' });
+Match.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
 // Stadium - Ticket
-Stadium.hasMany(Ticket, { foreignkey: 'stadiumId' });
-Ticket.belongsTo(Stadium, { foreignkey: 'stadiumId' });
+Stadium.hasMany(Ticket, { foreignKey: 'stadiumId' });
+Ticket.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
 // Team - Match
-Team.hasMany(Match, { foreignkey: 'homeId' });
-Match.belongsTo(Team, { foreignkey: 'homeId' });
+Team.hasMany(Match, { foreignKey: 'homeId' });
+Team.hasMany(Match, { foreignKey: 'awayId' });
+Match.belongsTo(Team, { foreignKey: 'homeId' });
+Match.belongsTo(Team, {foreignKey: 'awayId' });
 
 // Match - StadiumArea
-Match.hasMany(StadiumArea, { foreignkey: 'matchId' });
-StadiumArea.belongsTo(Match, { foreignkey: 'matchId' });
+Match.hasMany(StadiumArea, { foreignKey: 'matchId' });
+StadiumArea.belongsTo(Match, { foreignKey: 'matchId' });
 
 // Match - Ticket
-Match.hasMany(Ticket, { foreignkey: 'matchId' });
-Ticket.belongsTo(Match, { foreignkey: 'matchId' });
+Match.hasMany(Ticket, { foreignKey: 'matchId' });
+Ticket.belongsTo(Match, { foreignKey: 'matchId' });
 
 // StadiumArea - Ticket
-StadiumArea.hasMany(Ticket, { foreignkey: 'areaId' });
-Ticket.belongsTo(StadiumArea, { foreignkey: 'areaId' });
+StadiumArea.hasMany(Ticket, { foreignKey: 'areaId' });
+Ticket.belongsTo(StadiumArea, { foreignKey: 'areaId' });
 
 // User - Ticket
-User.hasMany(Ticket, { foreignkey: 'ownedBy' });
-Ticket.belongsTo(User, { foreignkey: 'ownedBy' });
+User.hasMany(Ticket, { foreignKey: 'ownedBy' });
+Ticket.belongsTo(User, { foreignKey: 'ownedBy' });
 
 
 module.exports = {

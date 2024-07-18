@@ -20,8 +20,8 @@ exports.login = async (req, res) => {
         }
 
         // 토근 생성 및 응답.
-        const accessToken = generateAccessToken({ email });
-        const refreshToken = generateRefreshToken({ email });
+        const accessToken = generateAccessToken({ userId: foundUser.userId, email });
+        const refreshToken = generateRefreshToken({ userId: foundUser.userId, email });
 
         // 리프레시토큰 업데이트
         await User.update(
@@ -57,10 +57,10 @@ exports.register = async (req, res) => {
     const hashedPW = await bcrypt.hash(password, 10);
     
     try {
-        const uuid = generateUUID();
-        const refreshToken =  generateRefreshToken({email});
+        const userId = generateUUID();
+        const refreshToken =  generateRefreshToken({userId: userId, email: email});
         const newUser = await User.create({
-            uuid,
+            userId,
             userName,
             email,
             password: hashedPW,
@@ -83,7 +83,7 @@ exports.refresh = async (req, res) => {
         jwt.verify(token, process.env.JWT_REFRESH_KEY, (err, user) => {
             if (err) return res.status(403).json({ err: "Invalid refresh token" });
 
-            const accessToken = generateAccessToken({ email: user.email });
+            const accessToken = generateAccessToken({ userId: user.userId, email: user.email });
             return res.json({ accessToken });
         });
     } catch (e) {

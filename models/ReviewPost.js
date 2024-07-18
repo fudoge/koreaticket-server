@@ -12,7 +12,7 @@ const ReviewPost = sequelize.define(
             allowNull: false
         },
         isNotice: {
-            type: DataTypes.Boolean,
+            type: DataTypes.BOOLEAN,
             defaultValue: false,
             allowNull: false
         },
@@ -21,7 +21,7 @@ const ReviewPost = sequelize.define(
             allowNull: false,
             references: {
                 model: User,
-                key: 'uuid'
+                key: 'userId'
             }
         },
         title: {

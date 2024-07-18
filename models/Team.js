@@ -1,22 +1,22 @@
-const { Sequelize, Datatypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db/db');
-const Stadium = require('Stadium');
+const Stadium = require('./Stadium');
 
 const Team = sequelize.define(
     'teams', 
     {
         teamId: {
-            type: Datatypes.INTEGER,
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
             allowNull: false
         },
         teamName: {
-            type: Datatypes.STRING,
+            type: DataTypes.STRING,
             allowNull: false,
         },
         stadiumId: {
-            type: Datatypes.INTEGER,
+            type: DataTypes.INTEGER,
             allowNull: false,
             references: {
                 model: Stadium,
@@ -25,7 +25,7 @@ const Team = sequelize.define(
             }
         },
         logoImagePath: {
-            type: Datatypes.STRING(512),
+            type: DataTypes.STRING(512),
             unique: true,
             allowNull: false
         }
