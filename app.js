@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const authRouter = require("./routes/authRoutes");
 const reviewBoardRouter = require("./routes/reviewRoutes");
@@ -10,11 +11,16 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '/build')));
 app.use('/auth', authRouter);
 app.use('/reviews', reviewBoardRouter);
 
 app.get('/', (req, res) => {
-    res.send("hello");
+    res.sendFile(path.join((__dirname, '/build/index.html')));
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join((__dirname, '/build/index.html')));
 });
 
 app.listen(port, () => {
