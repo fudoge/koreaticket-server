@@ -85,7 +85,7 @@ exports.createPost = async (req, res) => {
 
     try {
         const foundUser = User.findOne({ where: { userId: userId } });
-        if (foundUser.userId === userId) isNotice = true;
+        if (foundUser.isAdmin) isNotice = true;
 
         await ReviewPost.create({
             title: title,
