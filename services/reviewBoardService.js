@@ -56,8 +56,7 @@ exports.loadPostDetail = async (req, res) => {
             ]
         });
 
-        if (!post) res.status(404).json({ error: "Not Found" });
-
+        if (!post) return res.status(404).json({ error: "Not Found" });
         return res.status(200).json(post);
     } catch (e) {
         return res.status(500).json({ error: e.message });
@@ -82,17 +81,22 @@ exports.uploadImages = async (req, res) => {
 exports.createPost = async (req, res) => {
     const { title, content } = req.body;
     const userId = req.user.userId;
+    let isNotice = false;
 
     try {
-        ReviewPost.create({
+        const foundUser = User.findOne({ where: { userId: userId } });
+        if (foundUser.userId === userId) isNotice = true;
+
+        await ReviewPost.create({
             title: title,
             content: content,
             writtenBy: userId,
+            isNotice: isNotice
         });
 
-        res.sendStatus(201);
+        return res.sendStatus(201);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        return res.status(500).json({ error: e.message });
     }
 }
 
@@ -101,7 +105,7 @@ exports.deletePost = async (req, res) => {
     const userId = req.user.userId;
     try {
         const Post = await ReviewPost.findOne({ where: { postId: postId } });
-        if (Post.writtenBy != userId) res.status(403).json('You have no permission');
+        if (Post.writtenBy != userId) return res.status(403).json('You have no permission');
 
         await ReviewPost.destroy({
             where: { postId: postId }
