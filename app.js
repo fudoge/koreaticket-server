@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const authRouter = require("./routes/authRoutes");
+const reviewBoardRouter = require("./routes/reviewRoutes");
 
 const port = process.env.PORT;
 const app = express();
@@ -10,6 +11,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/auth', authRouter);
+app.use('/reviews', reviewBoardRouter);
 
 app.get('/', (req, res) => {
     res.send("hello");

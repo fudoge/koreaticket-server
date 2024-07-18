@@ -19,7 +19,7 @@ const ReviewImage = sequelize.define(
             type: DataTypes.INTEGER,
             references: {
                 model: Reviewpost,
-                key: postId
+                key: 'postId'
             }
         },
         imagaPath: {

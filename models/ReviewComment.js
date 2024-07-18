@@ -20,7 +20,7 @@ const ReviewComment = sequelize.define(
             allowNull: false,
             references: {
                 model: User,
-                key: 'uuid'
+                key: 'userId'
             }
         },
         postid: {
