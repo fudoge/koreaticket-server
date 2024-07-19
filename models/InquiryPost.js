@@ -25,11 +25,6 @@ const InquiryPost = sequelize.define(
         content: {
             type: DataTypes.TEXT,
             allowNull: false
-        },
-        isReplied: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-            allowNull: false
         }
 }, {
         timestamps: true,    

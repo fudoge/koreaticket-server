@@ -5,6 +5,7 @@ const path = require('path');
 
 const authRouter = require("./routes/authRoutes");
 const reviewBoardRouter = require("./routes/reviewRoutes");
+const mainRouter = require("./routes/mainRoutes");
 
 const port = process.env.PORT;
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '/build')));
 app.use('/auth', authRouter);
 app.use('/reviews', reviewBoardRouter);
+app.use('/main', mainRouter);
 
 app.get('/', (req, res) => {
     res.sendFile(path.join((__dirname, '/build/index.html')));

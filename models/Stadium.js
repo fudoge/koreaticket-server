@@ -24,11 +24,6 @@ const Stadium = sequelize.define(
         areaInfo: {
             type: DataTypes.STRING,
             allowNull: false
-        }, 
-        stadiumImagaPath: {
-            type: DataTypes.STRING(512),
-            unique: true,
-            allowNull: false
         }
 }, {
         timestamps: false
