@@ -2,6 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db/db');
 const Match = require('./Match');
 const User = require('./User');
+const Stadium = require('./Stadium');
 
 const Ticket = sequelize.define(
     'tickets',
@@ -17,6 +18,14 @@ const Ticket = sequelize.define(
             references: {
                 model: Match,
                 key: 'matchId'
+            }
+        },
+        stadiumId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: Stadium,
+                key: 'stadiumId'
             }
         },
         areaId: {
