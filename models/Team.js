@@ -23,11 +23,6 @@ const Team = sequelize.define(
                 key: 'stadiumId',
                 unique: true
             }
-        },
-        logoImagePath: {
-            type: DataTypes.STRING(512),
-            unique: true,
-            allowNull: false
         }
     }, {
         timestamps: false

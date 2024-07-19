@@ -22,7 +22,7 @@ const ReviewImage = sequelize.define(
                 key: 'postId'
             }
         },
-        imagaPath: {
+        imagePath: {
             type: DataTypes.STRING(512),
             unique: true,
             allowNull: false

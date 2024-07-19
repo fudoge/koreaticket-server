@@ -6,7 +6,7 @@ const UPLOADS_DIR = path.join(__dirname, '../../public/uploads/');
 
 exports.loadPosts = async (req, res) => {
     const page = parseInt(req.query.page - 1) || 1;
-    const offset = (page - 1) * 10;
+    const offset = (page - 1) * 4;
     const search = req.query.search || '';
 
     try {
@@ -28,7 +28,7 @@ exports.loadPosts = async (req, res) => {
                 }
             ],
             offset : offset,
-            limit: 10,
+            limit: 4,
             order: [['isNotice', 'DESC'], ['postId', 'DESC']]
         });
         
@@ -50,6 +50,7 @@ exports.loadPostDetail = async (req, res) => {
             }, include: [
                 {
                     model: ReviewComment,
+                    attributes: ['writtenBy', 'content', 'createdAt'],
                     order: [['createdAt', 'ASC']],
                     required: false
                 }
