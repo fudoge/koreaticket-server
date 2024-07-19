@@ -3,10 +3,12 @@ const JWT = require('jsonwebtoken');
 const authenticateJWT = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
 
-    if (!token) { res.sendStatus(401); }
+    if (!token) {
+        return res.status(401).json({message: "no token"});
+    }
+
     JWT.verify(token, process.env.JWT_ACCESS_KEY, (err, user) => {
         if (err) {
-            // 토큰 만료로 인한 오류인 경우
             if (err.name === 'TokenExpiredError') {
                 return res.status(401).json({ error: "Token expired" });
             }

@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const generateUUID = require('../utils/generateUUID');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
+const { validationResult } = require('express-validator');
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
@@ -28,7 +29,7 @@ exports.login = async (req, res) => {
             { refreshToken: refreshToken },
             {
                 where: {
-                    uuid: foundUser.uuid
+                    userId: foundUser.userId
                 }
             }
         );
@@ -66,7 +67,7 @@ exports.register = async (req, res) => {
             password: hashedPW,
             refreshToken
         });
-        res.status(201).json(newUser);
+        return res.status(201).json(newUser); //TODO: body 안보내기로
     } catch (e) {
         return res.status(500).json({error: e.message});
     }
@@ -105,12 +106,66 @@ exports.logout = async (req, res) => {
             { refreshToken: null },
             {
                 where: {
-                    uuid: foundUser.uuid
+                    userId: foundUser.userId
                 }
             });
         
             return res.sendStatus(204);
         });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+}
+
+exports.changePW = async (req, res) => {
+    const userId = req.user.userId;
+    const { password, newPassword } = req.body;
+
+    try {
+        const foundUser = await User.findOne({ where: { userId: userId } });
+        const isMatch = await bcrypt.compare(password, foundUser.password);
+        const hashedPW = await bcrypt.hash(newPassword, 10);
+
+        if (!isMatch) {
+            return res.status(400).json({ error: "Password does not match" });
+        }
+        
+        await User.update(
+            { password: hashedPW },
+            {
+                where: {
+                    userId: foundUser.userId
+                }
+            });
+        return res.sendStatus(204);
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    } 
+}
+
+exports.verifyPasswordBeforeQuit = async (req, res) => {
+    const userId = req.user.userId;
+    const { password } = req.body;
+
+    try {
+        const foundUser = await User.findOne({ where: { userId: userId } });
+        const isMatch = await bcrypt.compare(password, foundUser.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ error: "Password does not match" });
+        }
+
+        return 
+    } catch (e) {
+        return res.status(500).json({error: e.message});
+    }
+}
+
+exports.quitService = async (req, res) => {
+    const userId = req.user.userId;
+
+    try {
+        await User.destroy({ where: { userId: userId } });
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
