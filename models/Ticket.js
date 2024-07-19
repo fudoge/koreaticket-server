@@ -1,7 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../db/db');
 const Match = require('./Match');
-const StadiumArea = require('./StadiumArea');
 const User = require('./User');
 
 const Ticket = sequelize.define(
@@ -21,12 +20,8 @@ const Ticket = sequelize.define(
             }
         },
         areaId: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: StadiumArea,
-                key: 'areaId'
-            }
+            type: DataTypes.STRING,
+            allowNull: false
         },
         ownedBy: {
             type: DataTypes.UUID,

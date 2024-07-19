@@ -22,7 +22,7 @@ const Stadium = sequelize.define(
             allowNull: false
         }, 
         areaInfo: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: false
         }
 }, {

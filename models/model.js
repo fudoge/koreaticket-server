@@ -6,7 +6,6 @@ const Ticket = require('./Ticket');
 const Match = require('./Match');
 const Team = require('./Team');
 const Stadium = require('./Stadium');
-const StadiumArea = require('./StadiumArea');
 const InquiryPost = require('./InquiryPost');
 const InquiryReply = require('./InquiryReply');
 
@@ -40,10 +39,6 @@ InquiryReply.belongsTo(InquiryPost, { foreignKey: 'postId' });
 Stadium.hasOne(Team, { foreignKey: 'stadiumId' });
 Team.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
-// Stadium - StadiumArea
-Stadium.hasMany(StadiumArea, { foreignKey: 'stadiumId' });
-StadiumArea.belongsTo(Stadium, { foreignKey: 'stadiumId' });
-
 // Stadium - Match
 Stadium.hasMany(Match, { foreignKey: 'stadiumId' });
 Match.belongsTo(Stadium, { foreignKey: 'stadiumId' });
@@ -58,17 +53,9 @@ Team.hasMany(Match, { foreignKey: 'awayId' });
 Match.belongsTo(Team, { foreignKey: 'homeId' });
 Match.belongsTo(Team, {foreignKey: 'awayId' });
 
-// Match - StadiumArea
-Match.hasMany(StadiumArea, { foreignKey: 'matchId' });
-StadiumArea.belongsTo(Match, { foreignKey: 'matchId' });
-
 // Match - Ticket
 Match.hasMany(Ticket, { foreignKey: 'matchId' });
 Ticket.belongsTo(Match, { foreignKey: 'matchId' });
-
-// StadiumArea - Ticket
-StadiumArea.hasMany(Ticket, { foreignKey: 'areaId' });
-Ticket.belongsTo(StadiumArea, { foreignKey: 'areaId' });
 
 // User - Ticket
 User.hasMany(Ticket, { foreignKey: 'ownedBy' });
@@ -84,7 +71,6 @@ module.exports = {
     Match,
     Team,
     Stadium,
-    StadiumArea,
     InquiryPost,
     InquiryReply
 }
