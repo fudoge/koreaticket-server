@@ -1,8 +1,5 @@
 const { Op } = require('sequelize');
-const Match = require("../models/Match");
-const Team = require('../models/Team');
-const ReviewPost = require('../models/ReviewPost');
-const ReviewImage = require('../models/ReviewImage');
+const { Match, Team, ReviewPost, ReviewImage } = require('../models/model');
 const moment = require('moment');
 const now = moment();
 
