@@ -1,8 +1,5 @@
 const { Op } = require("sequelize");
 const {ReviewPost, ReviewImage, ReviewComment, User} = require("../models/model");
-const path = require('path');
-const fs = require('fs-extra');
-const UPLOADS_DIR = path.join(__dirname, '../../public/uploads/');
 
 exports.loadPosts = async (req, res) => {
     const page = parseInt(req.query.page - 1) || 1;
@@ -64,36 +61,37 @@ exports.loadPostDetail = async (req, res) => {
     }
 };
 
-exports.uploadImages = async (req, res) => {
-    try {
-        const imageUrls = await Promise.all(req.files.map(async (file) => {
-            const tempPath = file.path;
-            const targetPath = path.join(UPLOADS_DIR, file.originalname);
-            await fs.move(tempPath, targetPath, { overwrite: true });
-            return `/uploads/${file.originalname}`;
-        }));
-
-        res.status(200).json(imageUrls);
-    } catch (e) {
-        res.status(500).json({ error: e });
-    }
-};
-
 exports.createPost = async (req, res) => {
     const { title, content } = req.body;
     const userId = req.user.userId;
     let isNotice = false;
-
     try {
-        const foundUser = User.findOne({ where: { userId: userId } });
+        const foundUser = await User.findOne({ where: { userId: userId } });
         if (foundUser.isAdmin) isNotice = true;
 
-        await ReviewPost.create({
+       const generatedPost =  await ReviewPost.create({
             title: title,
             content: content,
             writtenBy: userId,
             isNotice: isNotice
         });
+
+        if (files) {
+            const [thumbNailFile, ...otherFiles] = req.files;
+            await ReviewImage.create({
+                isThumbNail: true,
+                postId: generatedPost.postId,
+                path: thumbNailFile.path
+            });
+
+            const filePromises = otherFiles.map(async (file) => ReviewImage.create({
+                isThumbNail: false,
+                postId: generatedPost.postId,
+                path: file.path
+            }));
+
+            await (Promise.all(filePromises));
+        }
 
         return res.sendStatus(201);
     } catch (e) {
