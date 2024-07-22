@@ -4,6 +4,8 @@ const User = require('../models/User');
 const generateUUID = require('../utils/generateUUID');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
 const { validationResult } = require('express-validator');
+const transporter = require('../utils/nodeMailer');
+const { where } = require('sequelize');
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
@@ -170,3 +172,40 @@ exports.quitService = async (req, res) => {
         return res.status(500).json({ error: e.message });
     }
 }
+
+exports.getTemporaryPassword = async (req, res) => {
+    const { email } = req.body;
+
+    const errs = validationResult(req);
+    if (!errs.isEmpty()) {
+        return res.status(400).json({ err: "유효하지 않은 이메일" });
+    }
+
+    try {
+        const foundUser = await User.findOne({
+            where: {email: email}
+        });
+        if (!foundUser) return res.status(404).json("No Email Found");
+
+        const temporaryPassword = (foundUser.password + Date.now()).toString('base64').substring(0, 12).replace(/[^a-zA-Z0-9]/g, '');
+        const hashedPW = await bcrypt.hash(temporaryPassword, 10);        
+
+        await User.update({
+            password: hashedPW
+        }, {
+            where: { userId: foundUser.userId }
+        })
+
+        await transporter.sendMail({
+            from: `KoreaTicket Team <${process.env.user}>`,
+            to: `${email}`,
+            subject: `${foundUser.userName}님, 임시 비밀번호를 발급해 드립니다.`,
+            text: `임시 비밀번호입니다: ${temporaryPassword}`
+        });
+
+        return res.sendStatus(204);
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+    
+};

@@ -1,6 +1,8 @@
 const express = require('express');
 const { body } = require('express-validator');
+const multer = require('multer');
 const storage = require('../utils/storage');
+
 const router = express.Router();
 const upload = multer({ storage: storage });
 
@@ -11,7 +13,7 @@ const bodyValidation = require('../middlewares/bodyValidationMiddleware');
 router.get('/', reviewBoardService.loadPosts);
 router.get('/:postId', reviewBoardService.loadPostDetail);
 router.post('/write', authenticateJWT,
-    upload.fields([{ name: 'images', maxCount: 10 }, { name: title }, { name: content }]),
+    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'title' }, { name: 'content' }]),
     body('title').notEmpty(), body('content').notEmpty(),
     reviewBoardService.createPost);
 router.delete('/:postId', authenticateJWT, reviewBoardService.deletePost);

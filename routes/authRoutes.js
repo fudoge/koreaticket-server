@@ -14,5 +14,6 @@ router.patch('/logout', authenticateJWT, authService.logout);
 router.patch('/changePassword', authenticateJWT, authService.changePW);
 router.post('/verifyBeforeQuit', authenticateJWT, authService.verifyPasswordBeforeQuit);
 router.delete('/quit', authenticateJWT, authService.quitService);
+router.patch('/temporaryPassword', body('email').isEmail(), authService.getTemporaryPassword);
 
 module.exports = router;
