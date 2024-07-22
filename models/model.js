@@ -48,10 +48,10 @@ Stadium.hasMany(Ticket, { foreignKey: 'stadiumId' });
 Ticket.belongsTo(Stadium, { foreignKey: 'stadiumId' });
 
 // Team - Match
-Team.hasMany(Match, { foreignKey: 'homeId' });
-Team.hasMany(Match, { foreignKey: 'awayId' });
-Match.belongsTo(Team, { foreignKey: 'homeId' });
-Match.belongsTo(Team, {foreignKey: 'awayId' });
+Team.hasMany(Match, { foreignKey: 'homeId', as: 'HomeMatches' });
+Team.hasMany(Match, { foreignKey: 'awayId', as: 'AwayMatches' });
+Match.belongsTo(Team, { foreignKey: 'homeId', as: 'HomeTeam' });
+Match.belongsTo(Team, {foreignKey: 'awayId', as: 'AwayTeam' });
 
 // Match - Ticket
 Match.hasMany(Ticket, { foreignKey: 'matchId' });

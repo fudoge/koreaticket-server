@@ -1,7 +1,4 @@
-const InquiryPost = require('../models/InquiryPost');
-const InquiryReply = require('../models/InquiryReply');
-const Ticket = require('../models/Ticket');
-const User = require('../models/User');
+const { InquiryPost, InquiryReply, Match, Stadium, Team, Ticket, User } = require('../models/model');
 
 exports.getHistory = async (req, res) => {
     const userId = req.user.userId;
@@ -10,7 +7,19 @@ exports.getHistory = async (req, res) => {
         const foundTickets = await Ticket.findAll({
             where: {
                 ownedBy: userId
-            }
+            },
+            include: [
+                {
+                    model: Match,
+                    include: [
+                        {model: Team, as: 'HomeTeam'},
+                        {model: Team, as: 'AwayTeam'},
+                    ]
+                },
+                {
+                    model: Stadium
+                }
+            ]
         });
 
         return res.status(200).json(foundTickets);
@@ -21,21 +30,22 @@ exports.getHistory = async (req, res) => {
 
 exports.getInquires = async (req, res) => {
     const userId = req.user.userId;
-    const page = parseInt(req.query.page - 1) || 1;
+    const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * 7;
     
     try {
-        const foundUser = User.findOne({
+        const foundUser = await User.findOne({
             where: { userId: userId }
         });
 
+        let inquires;
         if (foundUser.isAdmin) {
-            const Inquires = InquiryPost.findAll({
+            inquires = await InquiryPost.findAll({
                 limit: 7,
                 offset: offset
             });
         } else {
-            const myInquires = InquiryPost.findAll({
+            inquires = await InquiryPost.findAll({
                 where: {
                     writtenBy: userId
                 },
@@ -44,7 +54,7 @@ exports.getInquires = async (req, res) => {
             });
         }        
 
-        return res.status(200).json({isAdmin : true, inquiriesInfo: myInquires});
+        return res.status(200).json({isAdmin : true, inquiriesInfo: inquires});
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
