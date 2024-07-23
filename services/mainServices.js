@@ -1,5 +1,6 @@
-const { Op } = require('sequelize');
-const { Match, Team, ReviewPost, ReviewImage, Stadium } = require('../models/model');
+
+const matchRepository = require('../repository/matchRepository');
+const reviewRepository = require('../repository/reviewPostRepository');
 
 exports.returnInfos = async (req, res) => {
     const time = new Date();
@@ -10,29 +11,12 @@ exports.returnInfos = async (req, res) => {
 
     try {
         // 헤드라인 경기들 불러오기
-        const headLineMatches = await Match.findAll({
-            attributes: ['matchTime', 'matchId'],
-            where: {
-                matchTime: {
-                    [Op.gt]: currentKST,
-                    [Op.lt]: tomorrowKST
-                }
-            }, include: [
-                    { model: Team, as: 'HomeTeam' },
-                    { model: Team, as: 'AwayTeam' },
-                    { model: Stadium }
-                ]
-        });
+        const headLineMatches = await matchRepository.findMatchesByTimeBound(currentKST, tomorrowKST);
 
         // 후기게시판 썸네일과 제목 불러오기
-        const reviewPosts = await ReviewPost.findAll({
-            attributes: ['postId', 'title'],
-            include: [{ model: ReviewImage, where: { isThumbNail: true }, required: false }],
-            limit: 4
-        });
+        const reviewPosts = await reviewRepository.getRecentReviews();
 
         //TODO: 외부 API호출해서 순위표 불러오기
-        
 
         return res.status(200).json({ headLineMatches: headLineMatches, reviewPosts: reviewPosts });
     } catch (e) {

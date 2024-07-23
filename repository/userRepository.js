@@ -1,29 +1,57 @@
 const { User } = require('../models/model');
 
 exports.findUserByEmail = async (email) => {
-    return await User.findOne({ where: { email: email } });
+    try {
+        return await User.findOne({ where: { email: email } });
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
 
 exports.findUserByUserId = async (userId) => {
-    return await User.findOne({ where: { userId: userId } });
+    try {
+        return await User.findOne({ where: { userId: userId } });
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
 
 exports.findUserByRefreshToken = async (refreshToken) => {
-    return await User.findOne({ where: { refreshToken: refreshToken } });
+    try {
+        return await User.findOne({ where: { refreshToken: refreshToken } });
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
 
 exports.updateUserRefreshToken = async (userId, refreshToken) => {
-    return await User.update({ refreshToken: refreshToken }, { where: { userId: userId } });
+    try {
+        return await User.update({ refreshToken: refreshToken }, { where: { userId: userId } });
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
 
 exports.updateUserPassword = async (userId, newPassword) => {
-    return await User.update({ password: newPassword }, { where: {userId: userId}});
+    try {
+        return await User.update({ password: newPassword }, { where: {userId: userId}});
+    } catch (e) {
+        throw new Error(e.message);
+    }
 }
 
 exports.createUser = async (userData) => {
-    return await User.create(userData);
+    try {      
+        return await User.create(userData);
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
 
 exports.deleteUserByUserId = async (userId) => {
-    return await User.destroy({ where: { userId } });
+    try {
+        return await User.destroy({ where: { userId } });
+    } catch (e) {
+        throw new Error(e.message);
+    }
 };
