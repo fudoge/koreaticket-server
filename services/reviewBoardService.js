@@ -1,5 +1,6 @@
-const { Op } = require("sequelize");
-const {ReviewPost, ReviewImage, ReviewComment, User} = require("../models/model");
+const reviewPostRepository = require('../repository/reviewPostRepository');
+const userRepository = require('../repository/userRepository');
+const reviewCommentRepository = require('../repository/reviewCommentRepository');
 
 exports.loadPosts = async (req, res) => {
     const page = parseInt(req.query.page - 1) || 1;
@@ -7,28 +8,7 @@ exports.loadPosts = async (req, res) => {
     const search = req.query.search || '';
 
     try {
-        const reviewPosts = await ReviewPost.findAndCountAll({
-            attributes: ['postId', 'isNotice', 'writtenBy', 'title', 'createdAt'],
-            where: {
-                [Op.or]: [
-                    {isNotice: {[Op.eq]: true}},
-                    {title: {[Op.like]: `%${search}%`}},
-                    { content: { [Op.like]: `%${search}%` } },
-                ]
-            },
-            include: [
-                {
-                    model: ReviewImage,
-                    attributes: ['imagePath'],
-                    where: { isThumbNail: true },
-                    required: false
-                }
-            ],
-            offset : offset,
-            limit: 4,
-            order: [['isNotice', 'DESC'], ['postId', 'DESC']]
-        });
-        
+        const reviewPosts = await reviewPostRepository.findPostsWithPaging(search, offset);
         return res.status(200).json({
             count: reviewPosts.count,
             reviewPosts: reviewPosts.rows
@@ -41,24 +21,7 @@ exports.loadPosts = async (req, res) => {
 exports.loadPostDetail = async (req, res) => {
     const postId = req.params.postId;
     try {
-        const post = await ReviewPost.findOne({
-            where: {
-                postId: postId
-            }, include: [
-                {
-                    model: ReviewImage,
-                    attributes: ['imagePath'],
-                    required: false
-                },
-                {
-                    model: ReviewComment,
-                    attributes: ['writtenBy', 'content', 'createdAt'],
-                    order: [['createdAt', 'ASC']],
-                    required: false
-                }
-            ]
-        });
-
+        const post = await reviewPostRepository.findPostDetail(postId);
         if (!post) return res.status(404).json({ error: "Not Found" });
         return res.status(200).json(post);
     } catch (e) {
@@ -71,10 +34,10 @@ exports.createPost = async (req, res) => {
     const userId = req.user.userId;
     let isNotice = false;
     try {
-        const foundUser = await User.findOne({ where: { userId: userId } });
+        const foundUser = await userRepository.findUserByUserId(userId);
         if (foundUser.isAdmin) isNotice = true;
 
-       const generatedPost =  await ReviewPost.create({
+        const generatedPost = await reviewPostRepository.createPost({
             title: title,
             content: content,
             writtenBy: userId,
@@ -83,13 +46,13 @@ exports.createPost = async (req, res) => {
 
         if (files) {
             const [thumbNailFile, ...otherFiles] = req.files;
-            await ReviewImage.create({
+            await reviewImageRepository.createImage({
                 isThumbNail: true,
                 postId: generatedPost.postId,
                 path: thumbNailFile.path
             });
 
-            const filePromises = otherFiles.map(async (file) => ReviewImage.create({
+            const filePromises = otherFiles.map(async (file) => reviewImageRepository.createImage({
                 isThumbNail: false,
                 postId: generatedPost.postId,
                 path: file.path
@@ -108,12 +71,11 @@ exports.deletePost = async (req, res) => {
     const postId = req.params.postId;
     const userId = req.user.userId;
     try {
-        const Post = await ReviewPost.findOne({ where: { postId: postId } });
-        if (Post.writtenBy != userId) return res.status(403).json('You have no permission');
+        const foundUser = await userRepository.findUserByUserId(userId);
+        const Post = await reviewPostRepository.findPostById(postId);
+        if (Post.writtenBy != userId || !foundUser.isAdmin) return res.status(403).json('You have no permission');
 
-        await ReviewPost.destroy({
-            where: { postId: postId }
-        });
+        reviewPostRepository.deletePostById(postId);
         return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({ error: e.message });
@@ -125,7 +87,7 @@ exports.createComment = async (req, res) => {
     const userId = req.user.userId;
     const { message } = req.body;
     try {
-        await ReviewComment.create({
+        await reviewCommentRepository.createComment({
             content: message,
             writtenBy: userId,
             postId: postId
@@ -140,27 +102,21 @@ exports.deleteComment = async (req, res) => {
     const commentId = req.params.commentId;
     const userId = req.user.userId;
     try {
-        const foundUser = await User.findOne({ where: { email: email } });
+        const foundUser = await userRepository.findUserByUserId(userId);
         if (!foundUser) {
             return res.status(400).json({ error: "Cannot find User" });
         }
 
-        const foundComment = await ReviewComment.findOne({ where: { commentId: commentId } });
+        const foundComment = await reviewCommentRepository.findCommentById(commentId);
         if (!foundComment) return res.status(404).json({ error: "comment not found" });
-    } catch (e) {
-        return req.status(500).json(e.message);
-    }
 
-    if (foundUser.uuid != foundComment.writtenBy) {
-        return res.status(403).json({ error: "no permission" });
-    }
+        if (foundUser.uuid != foundComment.writtenBy) {
+            return res.status(403).json({ error: "no permission" });
+        }
 
-    try {
-        ReviewComment.destroy({
-            where: { commentId: commentId }
-        });
+        await reviewCommentRepository.deleteCommentById(commentId);
         return res.status(204).json();
     } catch (e) {
-        return res.status(500).json({ error: e.message });
+        return req.status(500).json(e.message);
     }
 }

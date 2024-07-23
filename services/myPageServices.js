@@ -1,27 +1,13 @@
-const { InquiryPost, InquiryReply, Match, Stadium, Team, Ticket, User } = require('../models/model');
+const userRepository = require('../repository/userRepository');
+const ticketRepository = require('../repository/ticketRepository');
+const inquiryPostRepository = require('../repository/inquiryPostRepository');
+const inquiryReplyRepository = require('../repository/inquiryReplyRepository')
 
 exports.getHistory = async (req, res) => {
     const userId = req.user.userId;
 
     try {
-        const foundTickets = await Ticket.findAll({
-            where: {
-                ownedBy: userId
-            },
-            include: [
-                {
-                    model: Match,
-                    include: [
-                        {model: Team, as: 'HomeTeam'},
-                        {model: Team, as: 'AwayTeam'},
-                    ]
-                },
-                {
-                    model: Stadium
-                }
-            ]
-        });
-
+        const foundTickets = await ticketRepository.getUserTickets(userId);
         return res.status(200).json(foundTickets);
     } catch (e) {
         return res.status(500).json({ error: e.message });
@@ -34,27 +20,16 @@ exports.getInquires = async (req, res) => {
     const offset = (page - 1) * 7;
     
     try {
-        const foundUser = await User.findOne({
-            where: { userId: userId }
-        });
+        const foundUser = await userRepository.findUserByUserId(userId);
 
         let inquires;
         if (foundUser.isAdmin) {
-            inquires = await InquiryPost.findAll({
-                limit: 7,
-                offset: offset
-            });
+            inquires = await inquiryPostRepository.findAllPosts(offset);
         } else {
-            inquires = await InquiryPost.findAll({
-                where: {
-                    writtenBy: userId
-                },
-                limit: 7,
-                offset: offset
-            });
-        }        
+            inquires = await inquiryPostRepository.findUserPosts(userId, offset);
+        }
 
-        return res.status(200).json({isAdmin : true, inquiriesInfo: inquires});
+        return res.status(200).json({isAdmin : foundUser.isAdmin, inquiriesInfo: inquires});
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
@@ -65,12 +40,7 @@ exports.getInquiryDetail = async (req, res) => {
     const userId = req.user.userId;
     
     try {
-        const inquiryInfo = await InquiryPost.findOne({
-            where: { postId: postId },
-            include: [{
-                model: InquiryReply
-            }]
-        });
+        const inquiryInfo = await inquiryPostRepository.findPostDetail(postId);
 
         if (inquiryInfo.writtenBy != userId) return res.status(403).json("permission denied");
         return res.status(200).json(inquiryInfo);
@@ -85,16 +55,11 @@ exports.postReply = async (req, res) => {
     const comment = req.body.comment;
 
     try {
-        const foundUser = User.findOne({
-            where: { userId: userId }
-        });
+        const foundUser = userRepository.findUserByUserId(userId);
         
         if (foundUser.isAdmin) {
             
-            await InquiryReply.create({
-                postId: postId,
-                content: comment
-            });
+            await inquiryReplyRepository.createComment(postId, comment);
             return res.sendStatus(201);
         } else {
             return res.status(403).json("no permission");
@@ -109,14 +74,14 @@ exports.postInquiry = async (req, res) => {
     const { title, type, content } = req.body;
 
     try {
-        await InquiryPost.create({
+        await inquiryPostRepository.createPost({
             title: title,
             type: type,
-            content: content
+            content: content,
+            writtenBy: userId
         });
         return res.sendStatus(201);
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
 }
-
