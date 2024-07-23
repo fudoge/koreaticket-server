@@ -46,6 +46,11 @@ exports.loadPostDetail = async (req, res) => {
                 postId: postId
             }, include: [
                 {
+                    model: ReviewImage,
+                    attributes: ['imagePath'],
+                    required: false
+                },
+                {
                     model: ReviewComment,
                     attributes: ['writtenBy', 'content', 'createdAt'],
                     order: [['createdAt', 'ASC']],
