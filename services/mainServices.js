@@ -1,7 +1,5 @@
 const { Op } = require('sequelize');
 const { Match, Team, ReviewPost, ReviewImage, Stadium } = require('../models/model');
-const moment = require('moment');
-const now = moment();
 
 exports.returnInfos = async (req, res) => {
     const time = new Date();

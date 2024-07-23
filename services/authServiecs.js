@@ -1,17 +1,17 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../models/User');
 const generateUUID = require('../utils/generateUUID');
+const generateTempPassword = require('../utils/generateTempPassword');
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateToken');
 const { validationResult } = require('express-validator');
-const transporter = require('../utils/nodeMailer');
-const { where } = require('sequelize');
+const userRepository = require('../repository/userRepository');
+const tempPasswordMailer = require('../utils/tempPasswordMailer');
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         // 이메일주소로 db매칭
-        const foundUser = await User.findOne({ where: { email: email } });
+        const foundUser = await userRepository.findUserByEmail(email);
         if (!foundUser) {
             return res.status(400).json({ error: "Cannot find User" });
         }
@@ -27,14 +27,7 @@ exports.login = async (req, res) => {
         const refreshToken = generateRefreshToken({ userId: foundUser.userId, email });
 
         // 리프레시토큰 업데이트
-        await User.update(
-            { refreshToken: refreshToken },
-            {
-                where: {
-                    userId: foundUser.userId
-                }
-            }
-        );
+        await userRepository.updateUserRefreshToken(foundUser.userId, refreshToken);
 
         return res.json({ accessToken, refreshToken });
     } catch (e) {
@@ -51,7 +44,7 @@ exports.register = async (req, res) => {
     }
 
     // 이메일주소로 db매칭 후 이미 있다면 생성하지 않음
-    const foundUser = await User.findOne({ where: { email: email } });
+    const foundUser = await userRepository.findUserByEmail(email);
     if (foundUser) {
         return res.status(400).json({ error: "User already exists" });
     }    
@@ -62,13 +55,13 @@ exports.register = async (req, res) => {
     try {
         const userId = generateUUID();
         const refreshToken =  generateRefreshToken({userId: userId, email: email});
-        const newUser = await User.create({
-            userId,
-            userName,
-            email,
+        const newUser = await userRepository.createUser({
+            userId: userId,
+            userName: userName,
+            email: email,
             password: hashedPW,
-            refreshToken
-        });
+            refreshToken: refreshToken
+        });d
         return res.status(201).json(newUser); //TODO: body 안보내기로
     } catch (e) {
         return res.status(500).json({error: e.message});
@@ -80,7 +73,7 @@ exports.refresh = async (req, res) => {
     if (!token) return res.sendStatus(401);
 
     try {
-        const foundUser = await User.findOne({ where: { refreshToken: token } });
+        const foundUser = await userRepository.findUserByRefreshToken(token);
         if (!foundUser) return res.status(403).json({ err: "Invalid refresh token" });
 
         jwt.verify(token, process.env.JWT_REFRESH_KEY, (err, user) => {
@@ -95,25 +88,10 @@ exports.refresh = async (req, res) => {
 }
 
 exports.logout = async (req, res) => {
-    const { token } = req.body;
 
     try {
-        const foundUser = await User.findOne({ where: { refreshToken: token } });
-        if (!foundUser) return res.status(403).json({ err: "Invalid refresh token" });
-
-        jwt.verify(token, process.env.JWT_REFRESH_KEY, async (err, user) => {
-            if (err) return res.status(403).json({ err: "Invalid refresh token" });
-
-        await User.update(
-            { refreshToken: null },
-            {
-                where: {
-                    userId: foundUser.userId
-                }
-            });
-        
-            return res.sendStatus(204);
-        });
+        await userRepository.updateUserRefreshToken(req.user.userId, null);
+        return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
@@ -124,7 +102,7 @@ exports.changePW = async (req, res) => {
     const { password, newPassword } = req.body;
 
     try {
-        const foundUser = await User.findOne({ where: { userId: userId } });
+        const foundUser = await userRepository.findUserByUserId(userId);
         const isMatch = await bcrypt.compare(password, foundUser.password);
         const hashedPW = await bcrypt.hash(newPassword, 10);
 
@@ -132,13 +110,7 @@ exports.changePW = async (req, res) => {
             return res.status(400).json({ error: "Password does not match" });
         }
         
-        await User.update(
-            { password: hashedPW },
-            {
-                where: {
-                    userId: foundUser.userId
-                }
-            });
+        await userRepository.updateUserPassword(userId, hashedPW);
         return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({ error: e.message });
@@ -150,14 +122,14 @@ exports.verifyPasswordBeforeQuit = async (req, res) => {
     const { password } = req.body;
 
     try {
-        const foundUser = await User.findOne({ where: { userId: userId } });
+        const foundUser = await userRepository.findUserByUserId(userId);
         const isMatch = await bcrypt.compare(password, foundUser.password);
 
         if (!isMatch) {
             return res.status(400).json({ error: "Password does not match" });
         }
 
-        return 
+        return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({error: e.message});
     }
@@ -167,7 +139,8 @@ exports.quitService = async (req, res) => {
     const userId = req.user.userId;
 
     try {
-        await User.destroy({ where: { userId: userId } });
+        await userRepository.deleteUserByUserId(userId);
+        return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
@@ -182,30 +155,17 @@ exports.getTemporaryPassword = async (req, res) => {
     }
 
     try {
-        const foundUser = await User.findOne({
-            where: {email: email}
-        });
+        const foundUser = await userRepository.findUserByEmail(email);
         if (!foundUser) return res.status(404).json("No Email Found");
 
-        const temporaryPassword = (foundUser.password + Date.now()).toString('base64').substring(0, 12).replace(/[^a-zA-Z0-9]/g, '');
+        const temporaryPassword = generateTempPassword(foundUser.password);
         const hashedPW = await bcrypt.hash(temporaryPassword, 10);        
 
-        await User.update({
-            password: hashedPW
-        }, {
-            where: { userId: foundUser.userId }
-        })
-
-        await transporter.sendMail({
-            from: `KoreaTicket Team <${process.env.user}>`,
-            to: `${email}`,
-            subject: `${foundUser.userName}님, 임시 비밀번호를 발급해 드립니다.`,
-            text: `임시 비밀번호입니다: ${temporaryPassword}`
-        });
+        await userRepository.updateUserPassword(foundUser.userId, hashedPW);
+        await tempPasswordMailer.sendTempPassword(email, foundUser.userName, temporaryPassword);
 
         return res.sendStatus(204);
     } catch (e) {
         return res.status(500).json({ error: e.message });
     }
-    
 };
