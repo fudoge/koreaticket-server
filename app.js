@@ -3,11 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const authRouter = require("./routes/authRoutes");
-const reviewBoardRouter = require("./routes/reviewRoutes");
-const mainRouter = require("./routes/mainRoutes");
-const myPageRouter = require("./routes/myPageRoutes");
-const matchRouter = require("./routes/matchRoutes");
+const authRouter = require("./controllers/authController");
+const reviewBoardRouter = require("./controllers/reviewController");
+const mainRouter = require("./controllers/mainController");
+const myPageRouter = require("./controllers/myPageController");
+const matchRouter = require("./controllers/matchController");
 
 const port = process.env.PORT;
 const app = express();
