@@ -1,6 +1,7 @@
 const reviewPostRepository = require('../repository/reviewPostRepository');
 const userRepository = require('../repository/userRepository');
 const reviewCommentRepository = require('../repository/reviewCommentRepository');
+const reviewImageReposiroty = require('../repository/reviewImageRepository');
 
 exports.loadPosts = async (req, res) => {
     const page = parseInt(req.query.page - 1) || 1;
@@ -29,6 +30,14 @@ exports.loadPostDetail = async (req, res) => {
     }
 };
 
+exports.uploadImage = (req, res) => {
+    try {
+        return res.status(201).json({ imagePath: `uploads/${req.file.filename}` });
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
+    }
+}
+
 exports.createPost = async (req, res) => {
     const { title, content } = req.body;
     const userId = req.user.userId;
@@ -43,24 +52,27 @@ exports.createPost = async (req, res) => {
             writtenBy: userId,
             isNotice: isNotice
         });
+        // 게시글을 파싱해서 이미지 경로 추출
+        const imagePaths = content.match(/src="(\/uploads\/[^\s"]+)"/g).map(url => url.replace(/src="/, '').replace(/"/, '')) || [];
 
-        if (files) {
-            const [thumbNailFile, ...otherFiles] = req.files;
-            await reviewImageRepository.createImage({
+        if (imagePaths) {
+            const [thumbNailPath, ...otherPaths] = imagePaths;
+            await reviewImageReposiroty.createImage({
                 isThumbNail: true,
                 postId: generatedPost.postId,
-                path: thumbNailFile.path
+                path: thumbNailPath
             });
 
-            const filePromises = otherFiles.map(async (file) => reviewImageRepository.createImage({
-                isThumbNail: false,
-                postId: generatedPost.postId,
-                path: file.path
-            }));
+            const filePromises = otherPaths.map(async (filePath) => {
+                reviewImageReposiroty.createImage({
+                    isThumbNail: false,
+                    postId: generatedPost.postId,
+                    path: filePath
+                });
+            });
 
             await (Promise.all(filePromises));
         }
-
         return res.sendStatus(201);
     } catch (e) {
         return res.status(500).json({ error: e.message });
