@@ -159,7 +159,7 @@ exports.getTemporaryPassword = async (req, res) => {
         if (!foundUser) return res.status(404).json("No Email Found");
 
         const temporaryPassword = generateTempPassword(foundUser.password);
-        const hashedPW = await bcrypt.hash(temporaryPassword, 10);        
+        const hashedPW = await bcrypt.hash(temporaryPassword, 10);     
 
         await userRepository.updateUserPassword(foundUser.userId, hashedPW);
         await tempPasswordMailer.sendTempPassword(email, foundUser.userName, temporaryPassword);
