@@ -61,7 +61,7 @@ exports.register = async (req, res) => {
             email: email,
             password: hashedPW,
             refreshToken: refreshToken
-        });d
+        });
         return res.status(201).json(newUser); //TODO: body 안보내기로
     } catch (e) {
         return res.status(500).json({error: e.message});

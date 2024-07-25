@@ -12,8 +12,8 @@ const bodyValidation = require('../middlewares/bodyValidationMiddleware');
 
 router.get('/', reviewBoardService.loadPosts);
 router.get('/:postId', reviewBoardService.loadPostDetail);
+router.post('/uploadImage', authenticateJWT, upload.single('image'), reviewBoardService.uploadImage);
 router.post('/write', authenticateJWT,
-    upload.fields([{ name: 'images', maxCount: 10 }, { name: 'title' }, { name: 'content' }]),
     body('title').notEmpty(), body('content').notEmpty(),
     reviewBoardService.createPost);
 router.delete('/:postId', authenticateJWT, reviewBoardService.deletePost);

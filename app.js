@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 
 const authRouter = require("./controllers/authController");
 const reviewBoardRouter = require("./controllers/reviewController");
@@ -12,6 +13,11 @@ const matchRouter = require("./controllers/matchController");
 const port = process.env.PORT;
 const app = express();
 
+app.use(cors({
+    origin: 'http://localhost:3000',
+    methods: 'GET, HEAD, PUT, PATCH, POST, DELETE',
+    credentials: false
+}));
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '/build')));
