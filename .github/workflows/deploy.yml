@@ -35,7 +35,7 @@ jobs:
               run: docker tag kticket-server-app ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
             - name: Push Docker image to Docker Hub
-              run: docker push kticket-server-app
+              run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
     deploy:
         runs-on: ubuntu-latest
