@@ -58,19 +58,19 @@ jobs:
                     sudo docker stop kticket-server-app || true
                     sudo docker rm kticket-server-app || true
                     sudo docker run -d --name kticket-server-app -p 3000:3000 \
-                    -e DB_NAME=${{ secrets.DB_NAME }}\
-                    -e DB_HOST=${{ secrets.DB_HOST }}\
-                    -e DB_USER=${{ secrets.DB_USER }}\
-                    -e DB_PASSWORD=${{ secrets.DB_PASSWORD }}\
-                    -e DB_DIALECT=${{ secrets.DB_DIALECT }}\
+                    -e DB_NAME=${{ secrets.DB_NAME }} \
+                    -e DB_HOST=${{ secrets.DB_HOST }} \
+                    -e DB_USER=${{ secrets.DB_USER }} \
+                    -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                    -e DB_DIALECT=${{ secrets.DB_DIALECT }} \
 
-                    -e JWT_ACCESS_KEY=${{ secrets.JWT_ACCESS_KEY }}\
-                    -e JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }}\
+                    -e JWT_ACCESS_KEY=${{ secrets.JWT_ACCESS_KEY }} \
+                    -e JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }} \
                     -e PORT=3000\
-                    -e SMTP_SERVER=${{ secrets.SMTP_SERVER }}\
-                    -e SMTP_PORT=${{ secrets.SMTP_PORT }}\
-                    -e EMAIL_USER=${{ secrets.EMAIL_USER }}\
-                    -e EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }}\
+                    -e SMTP_SERVER=${{ secrets.SMTP_SERVER }} \
+                    -e SMTP_PORT=${{ secrets.SMTP_PORT }} \
+                    -e EMAIL_USER=${{ secrets.EMAIL_USER }} \
+                    -e EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
                     ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
                 EOF
             
