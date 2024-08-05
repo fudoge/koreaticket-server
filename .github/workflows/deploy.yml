@@ -71,8 +71,8 @@ jobs:
 
                     echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login --username ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
                     sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
-                    sudo docker stop ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest || true
-                    sudo docker rm ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest || true
+                    sudo docker stop kticket-server-app || true
+                    sudo docker rm kticket-server-app || true
                     sudo docker run -d --name kticket-server-app -p 3000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
                 EOF
             
