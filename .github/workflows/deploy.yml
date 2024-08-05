@@ -31,8 +31,11 @@ jobs:
                 DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
               run: echo $DOCKER_HUB_ACCESS_TOKEN | docker login --username $DOCKER_HUB_USERNAME --password-stdin
 
+            - name: Set up Tag
+              run: docker tag kticket-server-app ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
+
             - name: Push Docker image to Docker Hub
-              run: docker push library/kticket-server-app
+              run: docker push kticket-server-app
 
     deploy:
         runs-on: ubuntu-latest
