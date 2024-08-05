@@ -53,9 +53,9 @@ jobs:
             - name: Deploy to EC2
               run: |
                 ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-                    docker pull kticket-server-app
-                    docker stop kticket-server-app || true
-                    docker rm kticket-server-app || true
-                    docker run -d 3000:3000 --name kticket-server-app kticket-server-app
+                    sudo docker pull kticket-server-app
+                    sudo docker stop kticket-server-app || true
+                    sudo docker rm kticket-server-app || true
+                    sudo docker run -d 3000:3000 --name kticket-server-app kticket-server-app
                 EOF
             
