@@ -1,7 +1,6 @@
 const express = require('express');
 const matchServices = require('../services/matchServices');
 const authenticateJWT = require('../middlewares/authmiddleware');
-const { body } = require('express-validator');
 
 const router = express.Router();
 

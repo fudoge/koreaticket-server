@@ -1,6 +1,6 @@
-const { Match, Team, Stadium } = require('../models/model');
+const { Match, Team, Stadium, Ticket } = require('../models/model');
 
-exports.getTicketsByUserId = async () => {
+exports.getTicketsByUserId = async (userId) => {
     try {
         return await Ticket.findAll({
             where: {
