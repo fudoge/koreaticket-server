@@ -1,21 +1,8 @@
 version: '3.8'
 
 services:
-  web:
+  app:
+    build: .
     image: kticket-server-app:latest
-    networks:
-      - webnet
     ports:
       -"3000:3000"
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    ports:
-      - "80:80"
-    networks:
-      - webnet
-
-networks:
-  webnet:
