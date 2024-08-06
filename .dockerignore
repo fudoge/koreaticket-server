@@ -1,1 +1,6 @@
 node_modules
+.git
+.env*
+!.env.vault
+.flaskenv*
+!.env.project
