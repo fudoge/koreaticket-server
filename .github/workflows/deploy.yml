@@ -22,8 +22,24 @@ jobs:
             # - name: Run ESLint
             #   run: npm run lint
 
+            - name: Create .env file
+              run: |
+                touch .env
+                echo DB_NAME="${{ secrets.DB_NAME }}" >> .env
+                echo DB_HOST="${{ secrets.DB_HOST }}" >> .env
+                echo DB_USER="${{ secrets.DB_USER }}" >> .env
+                echo DB_PASSWORD="${{ secrets.DB_PASSWORD }}" >> .env
+                echo DB_DIALECT="${{ secrets.DB_DIALECT }}" >> .env
+                echo JWT_ACCESS_KEY="${{ secrets.JWT_ACCESS_KEY }}" >> .env
+                echo JWT_REFRESH_KEY="${{ secrets.JWT_REFRESH_KEY }}" >> .env
+                echo PORT=3000 >> .env
+                echo SMTP_SERVER="${{ secrets.SMTP_SERVER }}" >> .env
+                echo SMTP_PORT="${{ secrets.SMTP_PORT }}" >> .env
+                echo EMAIL_USER="${{ secrets.EMAIL_USER }}" >> .env
+                echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
+
             - name: Build Docker Image
-              run: docker-compose build
+              run: docker build -t kticket-server-app .
 
             - name: Log in to Docker Hub
               env: 
@@ -35,7 +51,7 @@ jobs:
               run: docker tag kticket-server-app ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
             - name: Push Docker image to Docker Hub
-              run: NODE_ENV=production DOTENV_KEY="${{ secrets.DOTENV_KEY }}" docker-compose push ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
+              run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
     deploy:
         runs-on: ubuntu-latest
