@@ -22,6 +22,22 @@ jobs:
             # - name: Run ESLint
             #   run: npm run lint
 
+            - name: Create .env file
+              run: |
+                touch .env
+                echo "DB_NAME"=${{ secrets.DB_NAME }} >> .env
+                echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+                echo DB_USER=${{ secrets.DB_USER }} >> .env
+                echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+                echo DB_DIALECT=${{ secrets.DB_DIALECT }} >> .env
+                echo JWT_ACCESS_KEY=${{ secrets.JWT_ACCESS_KEY }} >> .env
+                echo JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }} >> .env
+                echo PORT=3000 >> .env
+                echo SMTP_SERVER=${{ secrets.SMTP_SERVER }} >> .env
+                echo SMTP_PORT=${{ secrets.SMTP_PORT }} >> .env
+                echo EMAIL_USER=${{ secrets.EMAIL_USER }} >> .env
+                echo EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} >> .env
+
             - name: Build Docker Image
               run: docker build -t kticket-server-app .
 
@@ -57,20 +73,6 @@ jobs:
                     sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
                     sudo docker stop kticket-server-app || true
                     sudo docker rm kticket-server-app || true
-                    sudo docker run -d --name kticket-server-app -p 3000:3000 \
-                    -e DB_NAME=${{ secrets.DB_NAME }} \
-                    -e DB_HOST=${{ secrets.DB_HOST }} \
-                    -e DB_USER=${{ secrets.DB_USER }} \
-                    -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-                    -e DB_DIALECT=${{ secrets.DB_DIALECT }} \
-
-                    -e JWT_ACCESS_KEY=${{ secrets.JWT_ACCESS_KEY }} \
-                    -e JWT_REFRESH_KEY=${{ secrets.JWT_REFRESH_KEY }} \
-                    -e PORT=3000\
-                    -e SMTP_SERVER=${{ secrets.SMTP_SERVER }} \
-                    -e SMTP_PORT=${{ secrets.SMTP_PORT }} \
-                    -e EMAIL_USER=${{ secrets.EMAIL_USER }} \
-                    -e EMAIL_PASSWORD=${{ secrets.EMAIL_PASSWORD }} \
-                    ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
+                    sudo docker run -d --name kticket-server-app -p 3000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
                 EOF
             
