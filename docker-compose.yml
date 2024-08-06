@@ -5,4 +5,7 @@ services:
     build: .
     image: kticket-server-app:latest
     ports:
-      -"3000:3000"
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DOTENV_KEY: ${DOTENV_KEY}
