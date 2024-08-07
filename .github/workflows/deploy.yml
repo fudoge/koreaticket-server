@@ -23,7 +23,7 @@ jobs:
             #   run: npm run lint
 
             - name: Build Docker Image
-              run: docker compose build kticket-server-app .
+              run: docker build -t kticket-server-app .
 
             - name: Log in to Docker Hub
               env: 
@@ -35,7 +35,7 @@ jobs:
               run: docker tag kticket-server-app ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
             - name: Push Docker image to Docker Hub
-              run: NODE_ENV=production DOTENV_KEY="${{ secrets.DOTNEV_KEY }} "docker compose push ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
+              run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app
 
     deploy:
         runs-on: ubuntu-latest
@@ -54,9 +54,8 @@ jobs:
               run: |
                 ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
                     echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login --username ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-                    sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
-                    sudo docker stop kticket-server-app || true
-                    sudo docker rm kticket-server-app || true
-                    sudo docker run -d --name kticket-server-app -p 3000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
+                    sudo docker compose down -t --rmi all
+                    sudo docker compose pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app}
+                    sudo NODE_ENV=production DOTENV_KEY="${{ secrets.DOTENV_KEY}}" docker compose up --build
                 EOF
             
