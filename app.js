@@ -1,5 +1,5 @@
-require('dotenv').config();
-// require('dotenv').config({ path: '.env.local' })
+// require('dotenv').config();
+require('dotenv').config({ path: '.env.local' })
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -28,13 +28,13 @@ app.use('/main', mainRouter);
 app.use('/myPage', myPageRouter);
 app.use('/matches', matchRouter);
 
-// app.get('/', (req, res) => {
-//     res.sendFile(path.join((__dirname, '/build/index.html')));
-// });
+app.get('/', (req, res) => {
+    res.sendFile(path.join((__dirname, '/build/index.html')));
+});
 
-// app.get('*', (req, res) => {
-//     res.sendFile(path.join((__dirname, '/build/index.html')));
-// });
+app.get('*', (req, res) => {
+    res.sendFile(path.join((__dirname, '/build/index.html')));
+});
 
 app.listen(port, () => {
     console.log(`Server is listening on ${port}`);

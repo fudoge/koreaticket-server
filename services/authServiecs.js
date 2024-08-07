@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
         // 리프레시토큰 업데이트
         await userRepository.updateUserRefreshToken(foundUser.userId, refreshToken);
 
-        return res.json({ accessToken, refreshToken });
+        return res.json({userName: foundUser.userName, accessToken, refreshToken });
     } catch (e) {
         return res.status(500).json({ error: e.message })
     }
