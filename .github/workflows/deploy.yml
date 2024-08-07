@@ -55,7 +55,7 @@ jobs:
                 ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
                     echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login --username ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
                     sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app}:latest
-                    sudo docker compose down --rmi all
-                    sudo NODE_ENV=production DOTENV_KEY="${{ secrets.DOTENV_KEY}}" docker compose up --build
+                    sudo docker compose -f ${{ secrets.COMPOSE_DIR }} down --rmi all 
+                    sudo NODE_ENV=production DOTENV_KEY="${{ secrets.DOTENV_KEY}}" docker compose -f ${{ secrets.COMPOSE_DIR }} up --build 
                 EOF
             
