@@ -14,7 +14,7 @@ exports.returnInfos = async (req, res) => {
         const headLineMatches = await matchRepository.findMatchesByTimeBound(currentKST, tomorrowKST);
 
         // 후기게시판 썸네일과 제목 불러오기
-        const reviewPosts = await reviewRepository.getRecentReviews();
+        const reviewPosts = await reviewRepository.findRecentReviews();
 
         //TODO: 외부 API호출해서 순위표 불러오기
 
