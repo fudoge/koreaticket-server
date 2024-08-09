@@ -60,6 +60,6 @@ jobs:
                     echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login --username ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
                     sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/kticket-server-app:latest
                     sudo docker compose -f ${{ secrets.COMPOSE_DIR }} down --rmi all
-                    sudo docker compose -f ${{ secrets.COMPOSE_DIR }} up --build --add-host host.docker.internal:host-gateway
+                    sudo docker compose -f ${{ secrets.COMPOSE_DIR }} up --build
                 EOF
             
